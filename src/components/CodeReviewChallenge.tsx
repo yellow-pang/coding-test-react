@@ -41,7 +41,7 @@ const fetchUsers = (): Promise<UserData[]> => {
 };
 
 const UserList = () => {
-  const [users, setUsers] = useState<any[]>([]); // state 1
+  const [users, setUsers] = useState<any[]>([]); // [리뷰1] 타입이 any[]로 지정되어 있어 타입 안정성이 떨어집니다. UserData[]로 명확하게 지정하는 것이 좋습니다.
   const [filter, setFilter] = useState(''); // state 2
   const [loading, setLoading] = useState(true); // state 3
   const [showAdminsOnly, setShowAdminsOnly] = useState(false); // state 4
@@ -60,7 +60,7 @@ const UserList = () => {
       const emailMatches = user.email.includes(filter);
       const adminMatches = !showAdminsOnly || user.isAdmin;
       return (nameMatches || emailMatches) && adminMatches;
-    });
+    }); // [리뷰2] 필터링 결과가 매 렌더마다 새로 계산됩니다. users, filter, showAdminsOnly가 바뀔 때만 계산되도록 useMemo로 감싸면 성능이 개선됩니다.
 
   return (
     <div className={styles.container}>
@@ -74,6 +74,7 @@ const UserList = () => {
           type="text"
           placeholder="이름으로 검색..."
           onChange={e => setFilter(e.target.value)}
+          value={filter} // [리뷰3] value 속성이 없어 비제어 컴포넌트가 됩니다. value={filter}를 추가해 제어 컴포넌트로 만드는 것이 React 권장 방식입니다.
           className={styles.input}
         />
         <label>
