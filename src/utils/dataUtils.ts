@@ -65,7 +65,11 @@ export const findUserById = (users: User[], id: number): User | undefined => {
 
 // 문제 3: 사용자 이름을 ID 맵으로 변환
 export const createUserMap = (users: User[]): { [id: number]: string } => {
-  return {};
+  const map: { [id: number]: string } = {};
+  users.forEach((user) => {
+    map[user.id] = user.name;
+  });
+  return map;
 };
 
 // 문제 4: 키를 기준으로 배열 정렬
@@ -74,7 +78,11 @@ export const sortArrayByKey = <T>(
   key: keyof T,
   order: "asc" | "desc"
 ): T[] => {
-  return [];
+  return [...array].sort((a, b) => {
+    if (a[key] < b[key]) return order === "asc" ? -1 : 1;
+    if (a[key] > b[key]) return order === "asc" ? 1 : -1;
+    return 0;
+  });
 };
 
 // 문제 5: 페이지네이션 구현
@@ -83,19 +91,33 @@ export const paginate = <T>(
   page: number,
   pageSize: number
 ): PaginatedResult<T> => {
-  return { items: [], totalItems: 0, totalPages: 0, currentPage: page };
+  const totalItems = array.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const start = (page - 1) * pageSize;
+  const items = array.slice(start, start + pageSize);
+  return { items, totalItems, totalPages, currentPage: page };
 };
 
 // 문제 6: 계산된 속성 추가 (age 가 20 이상을 adult 로 간주합니다)
 export const addIsAdultProperty = (
   users: User[]
 ): (User & { isAdult: boolean })[] => {
-  return [];
+  return users.map((user) => ({
+    ...user,
+    isAdult: user.age >= 20,
+  }));
 };
 
 // 문제 7: 카테고리별 상품 총액 계산
 export const getCategoryTotals = (products: Product[]): CategorySummary => {
-  return {};
+  const summary: CategorySummary = {};
+  products.forEach((product) => {
+    if (!summary[product.category]) {
+      summary[product.category] = { totalPrice: 0 };
+    }
+    summary[product.category].totalPrice += product.price;
+  });
+  return summary;
 };
 
 // 문제 8: 두 사용자 배열 병합 및 중복 제거 (중복이 있는 경우 users2 내의 사용자를 사용합니다)
@@ -103,15 +125,34 @@ export const mergeAndDeduplicateUsers = (
   users1: User[],
   users2: User[]
 ): User[] => {
-  return [];
+  const map: { [id: number]: User } = {};
+  users1.forEach((user) => {
+    map[user.id] = user;
+  });
+  users2.forEach((user) => {
+    map[user.id] = user;
+  });
+  return Object.values(map);
 };
 
 // 문제 9: 특정 태그를 가진 사용자 찾기
 export const findUsersByTag = (users: User[], tag: string): User[] => {
-  return [];
+  return users.filter((user) => user.tags?.includes(tag));
 };
 
 // 문제 10: 부서별 사용자 통계 집계
 export const getDepartmentSummary = (users: User[]): DepartmentSummary => {
-  return {};
+  const summary: DepartmentSummary = {};
+  users.forEach((user) => {
+    if (!summary[user.department]) {
+      summary[user.department] = { userCount: 0, averageAge: 0 };
+    }
+    summary[user.department].userCount += 1;
+    summary[user.department].averageAge += user.age;
+  });
+  Object.keys(summary).forEach((dept) => {
+    const avg = summary[dept].averageAge / summary[dept].userCount;
+    summary[dept].averageAge = Number(avg.toFixed(1));
+  });
+  return summary;
 };
